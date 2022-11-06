@@ -23,4 +23,8 @@ class ForthpageModel extends ChangeNotifier {
       notifyListeners();
     });
   }
+
+  Future delete(Book book) {
+    return FirebaseFirestore.instance.collection('books').doc(book.id).delete();
+  }
 }
