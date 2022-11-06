@@ -10,7 +10,7 @@ import 'forth_page_model.dart';
 
 class ForthPage extends StatelessWidget {
   ForthPage({Key? key}) : super(key: key);
- //更新をsnackbarに通知したい時に必要
+  //更新をsnackbarに通知したい時に必要
   final GlobalKey<ScaffoldMessengerState> _scaffoldKey =
       GlobalKey<ScaffoldMessengerState>();
 
@@ -58,6 +58,7 @@ class ForthPage extends StatelessWidget {
                         children: [
                           SlidableAction(
                             // An action can be bigger than the others.
+                            label: '編集',
                             flex: 1,
                             onPressed: (BuildContext context) async {
                               final bool? added = await Navigator.push(
@@ -80,14 +81,15 @@ class ForthPage extends StatelessWidget {
                             backgroundColor: Color.fromARGB(255, 126, 126, 126),
                             foregroundColor: Colors.white,
                             icon: Icons.edit,
-                            label: '編集',
                           ),
                           SlidableAction(
-                            onPressed: null,
+                            label: '削除',
+                            onPressed: (BuildContext context) async {
+                              await showMyDialog(context, book, model);
+                            },
                             backgroundColor: Color.fromARGB(255, 211, 63, 63),
                             foregroundColor: Colors.white,
                             icon: Icons.delete,
-                            label: '削除',
                           ),
                         ],
                       ),
@@ -121,6 +123,52 @@ class ForthPage extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Future<void> showMyDialog(
+    BuildContext context,
+    Book book,
+    ForthpageModel model,
+  ) async {
+    return showDialog<void>(
+      // `showDialog`メソッドでダイアログを呼び出す!
+      context: context, //必須の引数 ここでエラー出たら_showMyDialogの引数をいれる
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        //必須の引数
+        return AlertDialog(
+          //`showDialog`メソッドの必須の引数であるbuilder:の戻り値としてAlertDialog()を返す！
+          title: const Text('削除の確認'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text("『${book.title}』を削除しますか?"),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('いいえ'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('はい'),
+              onPressed: () async {
+                await model.delete(book);
+                Navigator.of(context).pop();
+                final snackBar = SnackBar(
+                  backgroundColor: Color.fromARGB(255, 246, 93, 93),
+                  content: Text('『${book.title}』を削除しました'),
+                );
+                _scaffoldKey.currentState?.showSnackBar(snackBar);
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
